@@ -2,7 +2,7 @@
 
 current_branch = %x(git rev-parse --abbrev-ref HEAD).sub("\n","")
 repo_url = %x(git config --get remote.origin.url).sub(".git\n", '')
-%x(git pulls list)
+%x(git pulls update)
 pull_requests = %x(git pulls list)
 possible_pull_request = pull_requests.split("\n").grep(Regexp.new(current_branch))
 has_pull_request = !possible_pull_request.empty?
