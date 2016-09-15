@@ -1,4 +1,5 @@
 #!/usr/bin/ruby
+# Needs https://github.com/schacon/git-pulls to work
 
 current_branch = %x(git rev-parse --abbrev-ref HEAD).sub("\n","")
 repo_url = %x(git config --get remote.origin.url).sub(".git\n", '')
