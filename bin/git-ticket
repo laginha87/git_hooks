@@ -1,0 +1,63 @@
+#!/usr/bin/env ruby
+
+# require 'rb-readline'
+# require 'pry'
+
+require 'json'
+
+DEFAULT_ACTION = "open"
+action = ARGV[0]
+if action
+  return puts("Invalid action, valid actions are: #{VALID_ACTIONS.join(',')}; got: #{action}") unless %w(show start open).include?(action)
+else
+  action = DEFAULT_ACTION
+end
+def user
+  @user ||= `git config --global jira.user`.sub("\n",'')
+end
+
+def token
+  @token ||= `git config --global jira.token`.sub("\n",'')
+end
+
+def url
+  @url ||= `git config --global jira.url`.sub("\n",'')
+end
+
+def ticket_types
+  @ticket_types = `git config --global jira.ticket-types`.sub("\n",'').split("|")
+end
+
+def ticket_regex
+  Regexp.new(ticket_types.map{|e| "(#{e}\\-\\d*)"}.join("|"))
+end
+
+def start
+  ticket = ARGV[1]
+  curl = "curl -s -u \"#{user}:#{token}\" -X GET https://#{url}/rest/api/2/issue/#{ticket}"
+  jira_ticket = JSON.parse(`#{curl}`)
+  jira_fields = jira_ticket['fields']
+  type = jira_fields['issuetype']['name'].downcase
+  description = jira_fields["summary"][0..50].split.join('_').downcase
+  branch_description = [type, user, description, ticket].map(&:split).join('/')
+  branch_name = branch_description
+  puts branch_name
+  `printf #{branch_name} | pbcopy`
+end
+
+
+def ticket_url
+  branch_name = `git name-rev --name-only HEAD`
+  ticket_name = ticket_regex.match(branch_name)[0].upcase
+  "https://#{url}/browse/#{ticket_name}"
+end
+
+def show
+  puts ticket_url
+end
+
+def open
+  `open #{ticket_url}`
+end
+
+send(action)

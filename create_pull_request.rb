@@ -1,4 +1,4 @@
-#!/usr/bin/ruby
+#!/usr/bin/env ruby
 # Needs https://github.com/schacon/git-pulls to work
 
 current_branch = %x(git rev-parse --abbrev-ref HEAD).sub("\n","")
